@@ -3,6 +3,7 @@
 // @author cmdr-chara
 
 const KEY = "enabled";
+const LIMIT = 2000;
 
 let on = phoenix.storage.get<boolean>(KEY) ?? false;
 
@@ -16,6 +17,15 @@ phoenix.ui.addComposerButton({
   },
 });
 
-phoenix.messages.onSend((text) =>
-  on && text.trim() && !text.startsWith("||") ? `||${text}||` : undefined,
-);
+phoenix.messages.onSend((text) => {
+  if (!on || !text.trim()) return;
+  if (text.includes("||")) {
+    // The draft already has spoiler tags; wrapping it would un-hide text.
+    return;
+  }
+  if (text.length + 4 > LIMIT) {
+    phoenix.ui.toast("Message too long to wrap in spoilers");
+    return;
+  }
+  return `||${text}||`;
+});

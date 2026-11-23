@@ -1,4 +1,4 @@
-// @description Rewrites links you send so they get a rich embed (X, TikTok, Instagram, Reddit)
+// @description Rewrites the X/Twitter links you send so they get a rich embed
 // @version 1.0.0
 // @author cmdr-chara
 
@@ -9,31 +9,10 @@ const settings = phoenix.settings.define({
     description: "Rewrite to fixupx.com",
     default: true,
   },
-  tiktok: {
-    type: "switch",
-    title: "TikTok",
-    description: "Rewrite to vxtiktok.com",
-    default: true,
-  },
-  instagram: {
-    type: "switch",
-    title: "Instagram",
-    description: "Rewrite to ddinstagram.com",
-    default: false,
-  },
-  reddit: {
-    type: "switch",
-    title: "Reddit",
-    description: "Rewrite to rxddit.com",
-    default: false,
-  },
 });
 
 const MIRRORS: { host: RegExp; to: string; on: keyof typeof settings }[] = [
   { host: /^(www\.|mobile\.)?(twitter\.com|x\.com)$/i, to: "fixupx.com", on: "twitter" },
-  { host: /^(www\.|m\.|vm\.)?tiktok\.com$/i, to: "vxtiktok.com", on: "tiktok" },
-  { host: /^(www\.)?instagram\.com$/i, to: "ddinstagram.com", on: "instagram" },
-  { host: /^(www\.|old\.|new\.)?reddit\.com$/i, to: "rxddit.com", on: "reddit" },
 ];
 
 const fix = (text: string) =>

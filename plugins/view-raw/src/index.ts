@@ -5,7 +5,8 @@
 const LIMIT = 1800;
 
 const dump = (value: unknown) => {
-  const json = JSON.stringify(value, null, 2) ?? "null";
+  // Zero-width spaces keep backticks inside the JSON from closing the block.
+  const json = (JSON.stringify(value, null, 2) ?? "null").replace(/```/g, "`\u200b`\u200b`");
   return json.length > LIMIT ? `${json.slice(0, LIMIT)}\n… truncated` : json;
 };
 
