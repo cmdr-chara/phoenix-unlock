@@ -273,18 +273,25 @@ pub fn start() {
          let ops = {
             let mut state = settings();
             if let Some(plugins) = plugins {
-               let moved = state.plugins.len() != plugins.len()
-                  || state
-                     .plugins
-                     .iter()
-                     .zip(&plugins)
-                     .any(|(old, new)| old.name != new.name);
+               let old = state
+                  .plugins
+                  .iter()
+                  .map(|plugin| plugin.name.clone())
+                  .collect::<Vec<_>>();
                state.plugins = plugins;
-               if moved {
-                  state
-                     .drafts
-                     .retain(|field, _| matches!(field, Field::Eval | Field::Install));
-               }
+               state.drafts.retain(|field, _| {
+                  match *field {
+                     Field::Eval | Field::Install => true,
+                     Field::Setting(index, _) | Field::Code(index) => {
+                        old.get(index).is_some_and(|name| {
+                           state
+                              .plugins
+                              .get(index)
+                              .is_some_and(|plugin| plugin.name == *name)
+                        })
+                     },
+                  }
+               });
             }
             let mut ops = state.run(job);
             if !state.motion.is_empty() {
