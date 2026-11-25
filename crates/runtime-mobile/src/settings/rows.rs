@@ -15,6 +15,8 @@ use crate::settings::{
    ICON_PLUGIN,
    Press,
    Slot,
+   color_accent,
+   color_muted,
    theme::template_props,
    tree::{
       Animate,
@@ -90,14 +92,39 @@ pub fn grid_cell(mut row: Tree) -> Tree {
    row.set(prop!("flex"), Some(Value::F64(1.0)));
    row.set(Prop::RADIUS, Some(Value::F64(12.0)));
    if let Some(inner) = row.kids.first_mut() {
-      inner.kids.remove(0);
+      let mut state = inner.kids.remove(0);
+      let toggle = inner
+         .kids
+         .get(1)
+         .and_then(|wrap| wrap.kids.first())
+         .and_then(|track| track.press);
+      let on = row
+         .props
+         .iter()
+         .any(|(key, value)| *key == Prop::ACCESSIBILITY_CHECKED && *value == Value::Bool(true));
+      let press_event = row
+         .props
+         .iter()
+         .find(|(key, _)| *key == Prop::ON)
+         .map(|(_, value)| value.clone());
+      inner.kids.truncate(1);
+      state.set(Prop::URI, Some(text(ICON_CHECK)));
+      state.set(
+         Prop::TINT,
+         Some(Value::I64(if on { color_accent() } else { color_muted() })),
+      );
+      state.set(prop!("width"), Some(Value::F64(28.0)));
+      state.set(prop!("height"), Some(Value::F64(28.0)));
+      state.set(Prop::MARGIN, Some(Value::Rect([14.0, 0.0, 0.0, 0.0])));
+      state.press = toggle;
+      state.set(Prop::ON, press_event);
+      inner.kids.push(state);
       if let Some(title) = inner
          .kids
          .first_mut()
          .and_then(|column| column.kids.first_mut())
       {
          title.set(prop!("maxLines"), Some(Value::I32(1)));
-         title.set(Prop::FONT_SIZE, Some(Value::F64(14.0)));
       }
    }
    row
