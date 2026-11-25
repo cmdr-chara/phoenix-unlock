@@ -13,6 +13,7 @@ use crate::settings::{
    ICON_FILE,
    ICON_PLUGIN,
    ICON_RELOAD,
+   InstallStatus,
    Press,
    color_accent,
    color_error,
@@ -206,7 +207,10 @@ fn debug_section() -> Tree {
    section("Debug", debug_rows)
 }
 
-pub fn install_sections(status: Option<&(String, i64)>, plugins: &[PluginInfo]) -> Vec<Tree> {
+pub fn install_sections(
+   status: Option<&(String, InstallStatus)>,
+   plugins: &[PluginInfo],
+) -> Vec<Tree> {
    let mut sections = vec![
       section("From Sunbird", listed_rows(plugins)),
       section("From a URL", vec![text_field(
@@ -223,8 +227,12 @@ pub fn install_sections(status: Option<&(String, i64)>, plugins: &[PluginInfo]) 
          false,
       )]),
    ];
-   if let Some((message, color)) = status {
-      let mut line = log_line(&[(message.clone(), *color)]);
+   if let Some((message, kind)) = status {
+      let color = match kind {
+         InstallStatus::Success => color_string(),
+         InstallStatus::Error => color_error(),
+      };
+      let mut line = log_line(&[(message.clone(), color)]);
       line.set(Prop::FONT_FAMILY, None);
       line.set(Prop::FONT_SIZE, Some(Value::F64(14.0)));
       line.set(Prop::LINE_HEIGHT, Some(Value::F64(18.0)));

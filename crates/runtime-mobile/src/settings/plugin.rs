@@ -28,11 +28,11 @@ use crate::settings::{
 };
 
 pub fn plugin_sections(index: usize, plugin: &PluginInfo) -> Vec<Tree> {
-   let subtitle = plugin
-      .error
-      .as_deref()
-      .map(|error| format!("Failed: {error}"))
-      .or_else(|| plugin.header.description.clone());
+   let subtitle = match (&plugin.error, &plugin.header.description) {
+      (Some(error), Some(description)) => Some(format!("Failed: {error}\n{description}")),
+      (Some(error), None) => Some(format!("Failed: {error}")),
+      (None, _) => plugin.header.description.clone(),
+   };
    let status = match (&plugin.error, plugin.enabled) {
       (Some(_), _) => "failed",
       (None, true) => "running",

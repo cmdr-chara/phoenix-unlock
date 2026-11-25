@@ -157,6 +157,12 @@ enum Field {
    Code(usize),
 }
 
+#[derive(Clone, Copy)]
+enum InstallStatus {
+   Success,
+   Error,
+}
+
 /// Nodes updated in place, so typing is not interrupted.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Slot {
@@ -211,7 +217,7 @@ struct Settings {
    /// A counter for `forceValue`, which the host applies when it changes.
    force_seq:      i64,
    /// What the last install did, shown on the install page.
-   install_status: Option<(String, i64)>,
+   install_status: Option<(String, InstallStatus)>,
 }
 
 static SETTINGS: LazyLock<Mutex<Settings>> = LazyLock::new(|| {

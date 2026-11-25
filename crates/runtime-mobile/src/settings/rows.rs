@@ -58,7 +58,6 @@ pub fn section(title: &str, rows: Vec<Tree>) -> Tree {
    section
 }
 
-/// A section of two-column rows, without the list dividers.
 pub fn grid_section(title: &str, cells: Vec<Tree>) -> Tree {
    let layouts = templates();
    let mut section = Tree::from_template(&layouts.section);
@@ -74,6 +73,13 @@ pub fn grid_section(title: &str, cells: Vec<Tree>) -> Tree {
       row.kids = vec![first];
       if let Some(second) = cells.next() {
          row.kids.push(second);
+      } else {
+         let mut spacer = Tree::from_template(&layouts.group);
+         spacer.set(prop!("width"), None);
+         spacer.set(prop!("flex"), Some(Value::F64(1.0)));
+         spacer.set(Prop::RADIUS, None);
+         spacer.set(prop!("clip"), None);
+         row.kids.push(spacer);
       }
       group.kids.push(row);
    }
@@ -86,13 +92,12 @@ pub fn grid_section(title: &str, cells: Vec<Tree>) -> Tree {
    section
 }
 
-/// Makes a switch row half of a grid row.
 pub fn grid_cell(mut row: Tree) -> Tree {
    row.set(prop!("width"), None);
    row.set(prop!("flex"), Some(Value::F64(1.0)));
    row.set(Prop::RADIUS, Some(Value::F64(12.0)));
    if let Some(inner) = row.kids.first_mut() {
-      let mut state = inner.kids.remove(0);
+      inner.kids.remove(0);
       let toggle = inner
          .kids
          .get(1)
@@ -108,14 +113,22 @@ pub fn grid_cell(mut row: Tree) -> Tree {
          .find(|(key, _)| *key == Prop::ON)
          .map(|(_, value)| value.clone());
       inner.kids.truncate(1);
-      state.set(Prop::URI, Some(text(ICON_CHECK)));
-      state.set(
-         Prop::TINT,
-         Some(Value::I64(if on { color_accent() } else { color_muted() })),
-      );
-      state.set(prop!("width"), Some(Value::F64(28.0)));
-      state.set(prop!("height"), Some(Value::F64(28.0)));
+      let color = if on { color_accent() } else { color_muted() };
+      let mut state = Tree::from_template(&templates().header);
+      state.set(Prop::TEXT, Some(text(if on { "On" } else { "Off" })));
+      state.set(Prop::COLOR, Some(Value::I64(color)));
+      state.set(Prop::FONT_SIZE, Some(Value::F64(13.0)));
+      state.set(prop!("fontWeight"), Some(Value::I32(700)));
+      state.set(Prop::ROLE, None);
       state.set(Prop::MARGIN, Some(Value::Rect([14.0, 0.0, 0.0, 0.0])));
+      state.set(Prop::PADDING, Some(Value::Rect([10.0, 4.0, 10.0, 4.0])));
+      state.set(Prop::RADIUS, Some(Value::F64(14.0)));
+      state.set(prop!("borderWidth"), Some(Value::F64(1.0)));
+      state.set(prop!("borderColor"), Some(Value::I64(color)));
+      state.set(
+         Prop::ACCESSIBILITY_LABEL,
+         Some(text(if on { "Enabled" } else { "Disabled" })),
+      );
       state.press = toggle;
       state.set(Prop::ON, press_event);
       inner.kids.push(state);

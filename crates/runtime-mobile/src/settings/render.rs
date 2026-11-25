@@ -426,16 +426,12 @@ impl Settings {
       }
    }
 
-   /// Restores unsubmitted text when a page with inputs is rebuilt.
    fn apply_drafts(&self, trees: &mut [Tree]) {
       fn apply(tree: &mut Tree, drafts: &HashMap<Field, String>) {
          if let Some(Slot::Input(field)) = tree.slot
             && let Some(draft) = drafts.get(&field)
          {
             tree.set(Prop::VALUE, Some(text(draft)));
-            if matches!(field, Field::Code(_)) {
-               tree.set(prop!("valueSpans"), Some(code_spans(draft)));
-            }
          }
          for kid in &mut tree.kids {
             apply(kid, drafts);

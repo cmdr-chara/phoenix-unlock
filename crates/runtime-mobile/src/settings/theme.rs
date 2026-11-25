@@ -154,6 +154,7 @@ pub fn template_props(props: &mut Props) {
       let colorish = *key == Prop::COLOR
          || *key == Prop::TINT
          || *key == phoenix_ui_mobile::prop!("background")
+         || *key == phoenix_ui_mobile::prop!("activeBackground")
          || *key == phoenix_ui_mobile::prop!("borderColor")
          || *key == phoenix_ui_mobile::prop!("placeholderColor");
       if !colorish {
