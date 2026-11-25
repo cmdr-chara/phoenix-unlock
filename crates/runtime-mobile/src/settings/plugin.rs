@@ -31,7 +31,8 @@ pub fn plugin_sections(index: usize, plugin: &PluginInfo) -> Vec<Tree> {
    let subtitle = plugin
       .error
       .as_deref()
-      .map(|error| format!("Failed: {error}"));
+      .map(|error| format!("Failed: {error}"))
+      .or_else(|| plugin.header.description.clone());
    let status = match (&plugin.error, plugin.enabled) {
       (Some(_), _) => "failed",
       (None, true) => "running",
@@ -79,9 +80,6 @@ pub fn plugin_sections(index: usize, plugin: &PluginInfo) -> Vec<Tree> {
    }
    sections.push(section("", actions));
    let mut info = vec![value_row("Name", &plugin.name)];
-   if let Some(description) = &plugin.header.description {
-      info.push(value_row("Description", description));
-   }
    for (label, value) in [
       ("Version", &plugin.header.version),
       ("Author", &plugin.header.author),
