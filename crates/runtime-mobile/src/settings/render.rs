@@ -1,5 +1,7 @@
 //! Builds, rerenders and closes phoenix's pages on the navigator.
 
+use std::collections::HashMap;
+
 use phoenix_ui_mobile::{
    Op,
    Prop,
@@ -423,6 +425,27 @@ impl Settings {
       }
    }
 
+   /// Restores unsubmitted text when a page with inputs is rebuilt.
+   fn apply_drafts(&self, trees: &mut [Tree]) {
+      fn apply(tree: &mut Tree, drafts: &HashMap<Field, String>) {
+         if let Some(Slot::Input(field)) = tree.slot
+            && let Some(draft) = drafts.get(&field)
+         {
+            tree.set(Prop::VALUE, Some(text(draft)));
+            if matches!(field, Field::Code(_)) {
+               tree.set(prop!("valueSpans"), Some(code_spans(draft)));
+            }
+         }
+         for kid in &mut tree.kids {
+            apply(kid, drafts);
+         }
+      }
+
+      for tree in trees {
+         apply(tree, &self.drafts);
+      }
+   }
+
    fn open_page(&mut self, kind: PageKind) -> Vec<Op> {
       let Some(screen) = &self.screen else {
          return Vec::new();
@@ -432,7 +455,8 @@ impl Settings {
          return Vec::new();
       }
       let header = screen.header.clone();
-      let (title, sections) = self.render(kind);
+      let (title, mut sections) = self.render(kind);
+      self.apply_drafts(&mut sections);
       let title = title.as_str();
 
       let mut page = Tree::from_template(&templates().page);
