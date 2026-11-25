@@ -279,16 +279,17 @@ pub fn start() {
                   .map(|plugin| plugin.name.clone())
                   .collect::<Vec<_>>();
                state.plugins = plugins;
+               let names = state
+                  .plugins
+                  .iter()
+                  .map(|plugin| plugin.name.clone())
+                  .collect::<Vec<_>>();
                state.drafts.retain(|field, _| {
                   match *field {
                      Field::Eval | Field::Install => true,
                      Field::Setting(index, _) | Field::Code(index) => {
-                        old.get(index).is_some_and(|name| {
-                           state
-                              .plugins
-                              .get(index)
-                              .is_some_and(|plugin| plugin.name == *name)
-                        })
+                        old.get(index)
+                           .is_some_and(|name| names.get(index).is_some_and(|new| new == name))
                      },
                   }
                });
