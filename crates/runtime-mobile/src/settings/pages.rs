@@ -38,15 +38,10 @@ pub fn main_sections(plugins: &[PluginInfo]) -> Vec<Tree> {
          .iter()
          .enumerate()
          .map(|(index, plugin)| {
-            let subtitle = plugin
-               .error
-               .as_deref()
-               .map(|error| format!("Failed: {error}"))
-               .or_else(|| plugin.header.description.clone());
             switch_row(
                Some(ICON_PLUGIN),
                &plugin.name,
-               subtitle.as_deref(),
+               plugin.error.as_ref().map(|_| "Failed"),
                plugin.enabled,
                Press::OpenPlugin(index),
                Press::Toggle(index),
@@ -58,11 +53,11 @@ pub fn main_sections(plugins: &[PluginInfo]) -> Vec<Tree> {
    update_section()
       .into_iter()
       .chain([
-         section("Plugins", rows),
          section("", vec![
             button_row("Install plugin", ICON_FILE, Some(Press::OpenInstall), true),
             button_row("Console", ICON_CONSOLE, Some(Press::OpenConsole), true),
          ]),
+         section(&format!("Plugins ({})", plugins.len()), rows),
          debug_section(),
          section("About", vec![
             value_row("Version", phoenix_runtime::update::VERSION),
