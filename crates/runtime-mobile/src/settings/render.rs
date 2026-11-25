@@ -343,6 +343,7 @@ impl Settings {
             continue;
          }
          let (_, mut sections) = self.render(kind);
+         self.apply_drafts(&mut sections);
          // Same layout: update the changed nodes and spring the flipped switch,
          // so the other rows are not rebuilt (and do not flicker).
          let old = self
