@@ -143,6 +143,8 @@ enum Job {
    Picked(crate::picker::Picked),
    /// Something the open pages show changed.
    Refresh,
+   /// Phoenix redrawn Settings for another light/dark theme.
+   ThemeChanged,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]

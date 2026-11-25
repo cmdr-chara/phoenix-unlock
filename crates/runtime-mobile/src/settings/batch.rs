@@ -62,7 +62,13 @@ pub fn rewrite_ops(batch: &[u8]) -> Action {
          return Action::Pass;
       },
    };
-   theme::observe(&ops);
+   let theme_changed = theme::observe(&ops);
+   if theme_changed
+      && settings().screen.is_some()
+      && let Some(worker) = WORKER.get()
+   {
+      let _ = worker.send(Job::ThemeChanged);
+   }
    settings()
       .rewrite(ops)
       .map_or(Action::Pass, |ops| Action::Replace(encode(&ops)))
@@ -149,7 +155,7 @@ fn text_of(payload: &Value) -> Option<String> {
 }
 
 impl Settings {
-   fn entry_ops(&mut self) -> (Entry, Vec<Op>) {
+   pub(super) fn entry_ops(&mut self) -> (Entry, Vec<Op>) {
       let row = button_row(TITLE, ICON_PLUGIN, Some(Press::OpenMain), true);
       let mut section = section("", vec![row]);
       let mut ops = Vec::new();

@@ -18,16 +18,15 @@ const LIGHT: u8 = 1;
 static THEME: AtomicU8 = AtomicU8::new(DARK);
 
 /// Whether Phoenix's own settings text is light on dark or dark on light.
-pub fn observe(ops: &[Op]) {
+pub fn observe(ops: &[Op]) -> bool {
    let mut light_text = 0;
    let mut dark_text = 0;
    for op in ops {
-      let Op::Create { kind, props, .. } = op else {
-         continue;
+      let props = match op {
+         Op::Create { kind, props, .. } if *kind == ViewKind::Text => props,
+         Op::Update { props, .. } => props,
+         _ => continue,
       };
-      if *kind != ViewKind::Text {
-         continue;
-      }
       let Some((_, value)) = props.iter().find(|(key, _)| *key == Prop::COLOR) else {
          continue;
       };
@@ -49,7 +48,9 @@ pub fn observe(ops: &[Op]) {
    } else {
       current
    };
+   let changed = next != current;
    THEME.store(next, Ordering::Relaxed);
+   changed
 }
 
 fn color_value(value: &Value) -> Option<i64> {

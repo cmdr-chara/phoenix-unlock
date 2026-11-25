@@ -235,6 +235,7 @@ impl Settings {
             ops
          },
          Job::Log => self.log_ops(),
+         Job::ThemeChanged => self.theme_changed(),
          Job::Submit(Field::Eval) => {
             let mut ops = self.log_ops();
             ops.extend(self.clear_ops(Field::Eval));
@@ -489,6 +490,56 @@ impl Settings {
          });
       }
       ops.extend(self.navigator_ops());
+      ops
+   }
+
+   /// Rebuilds the injected row and open pages after Phoenix redraws Settings
+   /// in another theme.
+   fn theme_changed(&mut self) -> Vec<Op> {
+      let mut ops = self.replace_entry();
+      let kinds = self.screen.as_ref().map_or_default(|screen| {
+         screen
+            .stack
+            .iter()
+            .map(|page| page.kind)
+            .collect::<Vec<PageKind>>()
+      });
+      while self
+         .screen
+         .as_ref()
+         .is_some_and(|screen| !screen.stack.is_empty())
+      {
+         ops.extend(self.close_top());
+      }
+      for kind in kinds {
+         ops.extend(self.open_page(kind));
+      }
+      ops
+   }
+
+   fn replace_entry(&mut self) -> Vec<Op> {
+      let Some((list, search, rows, old)) = self.screen.as_ref().map(|screen| {
+         (
+            screen.list,
+            screen.search,
+            screen.rust_rows.clone(),
+            screen.entry.as_ref().map(|entry| entry.ids.clone()),
+         )
+      }) else {
+         return Vec::new();
+      };
+      let (entry, mut ops) = self.entry_ops();
+      let mut ids = rows.unwrap_or_default();
+      let at = usize::from(search.is_some() && ids.first() == search.as_ref());
+      ids.insert(at, entry.root);
+      if let Some(screen) = &mut self.screen {
+         screen.entry = Some(entry);
+      }
+      ops.push(Op::Children { id: list, ids });
+      if let Some(old) = old {
+         ops.push(Op::Delete { ids: old.clone() });
+         self.forget(&old);
+      }
       ops
    }
 

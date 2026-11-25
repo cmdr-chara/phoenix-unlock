@@ -30,7 +30,11 @@ pub fn act(job: &Job) {
    match *job {
       Job::Log => LOG_QUEUED.store(false, Ordering::Relaxed),
       // The editor is multiline: Enter is a newline there, and Save saves.
-      Job::Submit(Field::Code(_)) | Job::NavigateTo(_) | Job::Draft(..) | Job::Refresh => {},
+      Job::Submit(Field::Code(_))
+      | Job::NavigateTo(_)
+      | Job::Draft(..)
+      | Job::Refresh
+      | Job::ThemeChanged => {},
       Job::Submit(field) => submit(field),
       Job::Picked(ref picked) => {
          match picked {
