@@ -39,6 +39,7 @@ use crate::{
          section,
       },
       settings,
+      theme,
    },
 };
 
@@ -61,6 +62,7 @@ pub fn rewrite_ops(batch: &[u8]) -> Action {
          return Action::Pass;
       },
    };
+   theme::observe(&ops);
    settings()
       .rewrite(ops)
       .map_or(Action::Pass, |ops| Action::Replace(encode(&ops)))

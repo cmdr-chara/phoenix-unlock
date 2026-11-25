@@ -12,15 +12,15 @@ use crate::{
       Kind,
    },
    settings::{
-      COLOR_COMMENT,
-      COLOR_KEYWORD,
-      COLOR_NUMBER,
-      COLOR_STRING,
-      COLOR_TEXT,
       Field,
       ICON_CONSOLE,
       ICON_RELOAD,
       Press,
+      color_comment,
+      color_keyword,
+      color_number,
+      color_string,
+      color_text,
       rows::{
          InputKind,
          button_row,
@@ -38,13 +38,13 @@ use crate::{
 /// Plugins larger than this are not shown in the code editor.
 const MAX_EDIT: usize = 100 * 1024;
 
-pub const fn code_color(kind: Kind) -> i64 {
+pub fn code_color(kind: Kind) -> i64 {
    match kind {
-      Kind::Plain => COLOR_TEXT,
-      Kind::Comment => COLOR_COMMENT,
-      Kind::String => COLOR_STRING,
-      Kind::Keyword => COLOR_KEYWORD,
-      Kind::Number => COLOR_NUMBER,
+      Kind::Plain => color_text(),
+      Kind::Comment => color_comment(),
+      Kind::String => color_string(),
+      Kind::Keyword => color_keyword(),
+      Kind::Number => color_number(),
    }
 }
 

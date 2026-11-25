@@ -8,16 +8,16 @@ use phoenix_ui_mobile::Prop;
 use phoenix_wire::Value;
 
 use crate::settings::{
-   COLOR_ACCENT,
-   COLOR_ERROR,
-   COLOR_STRING,
-   COLOR_WARN,
    Field,
    ICON_CONSOLE,
    ICON_FILE,
    ICON_PLUGIN,
    ICON_RELOAD,
    Press,
+   color_accent,
+   color_error,
+   color_string,
+   color_warn,
    console::log_line,
    rows::{
       InputKind,
@@ -106,9 +106,9 @@ fn update_section() -> Option<Tree> {
          );
          if let Some(label) = row.kids.first_mut().and_then(|row| row.kids.get_mut(1)) {
             let color = if update_busy {
-               COLOR_ACCENT
+               color_accent()
             } else {
-               COLOR_STRING
+               color_string()
             };
             label.set(Prop::COLOR, Some(Value::I64(color)));
          }
@@ -117,7 +117,7 @@ fn update_section() -> Option<Tree> {
       if let Some(status) = &update_status
          && (!update_busy || update_found.is_none())
       {
-         let mut line = log_line(&[(status.clone(), COLOR_WARN)]);
+         let mut line = log_line(&[(status.clone(), color_warn())]);
          line.set(Prop::FONT_FAMILY, None);
          line.set(Prop::FONT_SIZE, Some(Value::F64(13.0)));
          line.set(Prop::LINE_HEIGHT, Some(Value::F64(18.0)));
@@ -152,7 +152,10 @@ fn listed_rows(plugins: &[PluginInfo]) -> Vec<Tree> {
          )];
       },
       Catalog::Failed(err) => {
-         let mut line = log_line(&[(format!("The plugin list did not load: {err}"), COLOR_ERROR)]);
+         let mut line = log_line(&[(
+            format!("The plugin list did not load: {err}"),
+            color_error(),
+         )]);
          line.set(Prop::FONT_FAMILY, None);
          return vec![line];
       },

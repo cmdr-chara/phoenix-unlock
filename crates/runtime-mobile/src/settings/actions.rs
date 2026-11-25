@@ -10,13 +10,13 @@ use phoenix_runtime::{
 };
 
 use crate::settings::{
-   COLOR_ERROR,
-   COLOR_STRING,
    Field,
    Job,
    LOG_QUEUED,
    Press,
    TITLE,
+   color_error,
+   color_string,
    settings,
 };
 
@@ -41,7 +41,7 @@ pub fn act(job: &Job) {
             Err(err) => {
                log::error!("file picker: {err}");
                settings().install_status =
-                  Some((format!("The file picker failed: {err}"), COLOR_ERROR));
+                  Some((format!("The file picker failed: {err}"), color_error()));
             },
          }
       },
@@ -200,8 +200,8 @@ fn listed(index: usize) {
       Some(info) if !info.installed => phoenix_runtime::set_enabled(&info.name, !info.enabled),
       Some(info) => {
          settings().install_status = Some(match phoenix_runtime::uninstall(&info.name) {
-            Ok(()) => (format!("Uninstalled {}.", info.name), COLOR_STRING),
-            Err(err) => (format!("Uninstall failed: {err}"), COLOR_ERROR),
+            Ok(()) => (format!("Uninstalled {}.", info.name), color_string()),
+            Err(err) => (format!("Uninstall failed: {err}"), color_error()),
          });
       },
    }
@@ -214,12 +214,12 @@ fn installed(result: Result<String, phoenix_runtime::Error>, from: &str) {
          log::info!("installed {name} from {from}");
          (
             format!("Installed {name}. It is on the {TITLE} page now."),
-            COLOR_STRING,
+            color_string(),
          )
       },
       Err(err) => {
          log::error!("install failed: {err}");
-         (format!("Install failed: {err}"), COLOR_ERROR)
+         (format!("Install failed: {err}"), color_error())
       },
    };
    settings().install_status = Some(status);

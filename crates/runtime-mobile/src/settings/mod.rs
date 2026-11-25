@@ -14,6 +14,7 @@ mod pages;
 mod plugin;
 mod render;
 mod rows;
+mod theme;
 mod tree;
 
 use std::{
@@ -44,6 +45,18 @@ use phoenix_ui_mobile::{
    Op,
    Props,
    encode,
+};
+pub use theme::{
+   accent as color_accent,
+   comment as color_comment,
+   error as color_error,
+   keyword as color_keyword,
+   muted as color_muted,
+   number as color_number,
+   string as color_string,
+   tag as color_tag,
+   text as color_text,
+   warn as color_warn,
 };
 
 use crate::{
@@ -77,18 +90,6 @@ const ICON_RELOAD: &str = "res://ic_mana_puzzle_piece_retry";
 const ICON_UNINSTALL: &str = "res://ic_mana_puzzle_piece_minus";
 const ICON_CONSOLE: &str = "res://ic_mana_angle_brackets";
 const ICON_FILE: &str = "res://ic_mana_image_file_up";
-/// Text colors, ARGB, for Discord's dark theme.
-const COLOR_TEXT: i64 = 0xFFF6_F6F7;
-const COLOR_MUTED: i64 = 0xFF94_9BA4;
-const COLOR_WARN: i64 = 0xFFF0_B232;
-const COLOR_ERROR: i64 = 0xFFF2_3F42;
-const COLOR_ACCENT: i64 = 0xFF79_C0FF;
-const COLOR_TAG: i64 = 0xFFD2_A8FF;
-const COLOR_STRING: i64 = 0xFF7E_E787;
-const COLOR_KEYWORD: i64 = 0xFFFF_7B72;
-const COLOR_NUMBER: i64 = 0xFF79_C0FF;
-const COLOR_COMMENT: i64 = 0xFF8B_949E;
-
 /// Plugins are named by their index in [`phoenix_runtime::plugins`] as of the
 /// last render, which every install follows with a fresh one.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
