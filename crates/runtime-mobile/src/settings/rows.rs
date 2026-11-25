@@ -122,9 +122,6 @@ pub fn grid_cell(mut row: Tree) -> Tree {
       state.set(Prop::ROLE, None);
       state.set(Prop::MARGIN, Some(Value::Rect([14.0, 0.0, 0.0, 0.0])));
       state.set(Prop::PADDING, Some(Value::Rect([10.0, 4.0, 10.0, 4.0])));
-      state.set(Prop::RADIUS, Some(Value::F64(14.0)));
-      state.set(prop!("borderWidth"), Some(Value::F64(1.0)));
-      state.set(prop!("borderColor"), Some(Value::I64(color)));
       state.set(
          Prop::ACCESSIBILITY_LABEL,
          Some(text(if on { "Enabled" } else { "Disabled" })),
