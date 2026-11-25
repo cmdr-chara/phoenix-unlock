@@ -535,8 +535,12 @@ impl Settings {
       {
          ops.extend(self.close_top());
       }
+      let console_open = kinds.contains(&PageKind::Console);
       for kind in kinds {
          ops.extend(self.open_page(kind));
+      }
+      if console_open {
+         ops.extend(self.log_ops());
       }
       ops
    }
