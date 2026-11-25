@@ -273,7 +273,18 @@ pub fn start() {
          let ops = {
             let mut state = settings();
             if let Some(plugins) = plugins {
+               let moved = state.plugins.len() != plugins.len()
+                  || state
+                     .plugins
+                     .iter()
+                     .zip(&plugins)
+                     .any(|(old, new)| old.name != new.name);
                state.plugins = plugins;
+               if moved {
+                  state
+                     .drafts
+                     .retain(|field, _| matches!(field, Field::Eval | Field::Install));
+               }
             }
             let mut ops = state.run(job);
             if !state.motion.is_empty() {
