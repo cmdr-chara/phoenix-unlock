@@ -22,6 +22,8 @@ use crate::settings::{
    rows::{
       InputKind,
       button_row,
+      grid_cell,
+      grid_section,
       section,
       switch_row,
       text_field,
@@ -38,14 +40,14 @@ pub fn main_sections(plugins: &[PluginInfo]) -> Vec<Tree> {
          .iter()
          .enumerate()
          .map(|(index, plugin)| {
-            switch_row(
+            grid_cell(switch_row(
                Some(ICON_PLUGIN),
                &plugin.name,
                plugin.error.as_ref().map(|_| "Failed"),
                plugin.enabled,
                Press::OpenPlugin(index),
                Press::Toggle(index),
-            )
+            ))
          })
          .collect()
    };
@@ -57,7 +59,7 @@ pub fn main_sections(plugins: &[PluginInfo]) -> Vec<Tree> {
             button_row("Install plugin", ICON_FILE, Some(Press::OpenInstall), true),
             button_row("Console", ICON_CONSOLE, Some(Press::OpenConsole), true),
          ]),
-         section(&format!("Plugins ({})", plugins.len()), rows),
+         grid_section(&format!("Plugins ({})", plugins.len()), rows),
          debug_section(),
          section("About", vec![
             value_row("Version", phoenix_runtime::update::VERSION),

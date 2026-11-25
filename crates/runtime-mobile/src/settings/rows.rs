@@ -4,6 +4,7 @@ use phoenix_ui_mobile::{
    Prop,
    Props,
    motion::Worklet,
+   prop,
    templates,
 };
 use phoenix_wire::Value;
@@ -53,6 +54,53 @@ pub fn section(title: &str, rows: Vec<Tree>) -> Tree {
    }
    section.kids.push(group);
    section
+}
+
+/// A section of two-column rows, without the list dividers.
+pub fn grid_section(title: &str, cells: Vec<Tree>) -> Tree {
+   let layouts = templates();
+   let mut section = Tree::from_template(&layouts.section);
+   let mut group = Tree::from_template(&layouts.group);
+   group.set(Prop::GAP, Some(Value::F64(8.0)));
+   let mut cells = cells.into_iter();
+   while let Some(first) = cells.next() {
+      let mut row = Tree::from_template(&layouts.group);
+      row.set(prop!("direction"), Some(text("row")));
+      row.set(Prop::RADIUS, None);
+      row.set(prop!("clip"), None);
+      row.set(Prop::GAP, Some(Value::F64(8.0)));
+      row.kids = vec![first];
+      if let Some(second) = cells.next() {
+         row.kids.push(second);
+      }
+      group.kids.push(row);
+   }
+   if !title.is_empty() {
+      let mut header = Tree::from_template(&layouts.header);
+      header.set(Prop::TEXT, Some(text(title)));
+      section.kids.push(header);
+   }
+   section.kids.push(group);
+   section
+}
+
+/// Makes a switch row half of a grid row.
+pub fn grid_cell(mut row: Tree) -> Tree {
+   row.set(prop!("width"), None);
+   row.set(prop!("flex"), Some(Value::F64(1.0)));
+   row.set(Prop::RADIUS, Some(Value::F64(12.0)));
+   if let Some(inner) = row.kids.first_mut() {
+      inner.kids.remove(0);
+      if let Some(title) = inner
+         .kids
+         .first_mut()
+         .and_then(|column| column.kids.first_mut())
+      {
+         title.set(prop!("maxLines"), Some(Value::I32(1)));
+         title.set(Prop::FONT_SIZE, Some(Value::F64(14.0)));
+      }
+   }
+   row
 }
 
 /// `root > row > [icon, text, chevron]`
