@@ -1784,13 +1784,16 @@ fn mono_span(text: &str, argb: u32) -> Option<RawDiv> {
    Some(d)
 }
 
-fn plain_text_div(text: &str, argb: u32, font_px: f32) -> Option<RawDiv> {
+/// `text` in `argb`, or without a color of its own when `None`, which takes
+/// the modal's, light or dark with Discord's theme.
+fn plain_text_div(text: &str, argb: Option<u32>, font_px: f32) -> Option<RawDiv> {
    let mut d = gpui::raw_div()?;
-   let hsla = argb_to_hsla(argb);
    gpui::style_div(&mut d, |s| {
       s.length(s.at.font_size, gpui_px(font_px));
       s.length(s.at.line_height, gpui_px(font_px + 5.0));
-      s.hsla(s.at.text_color, hsla);
+      if let Some(argb) = argb {
+         s.hsla(s.at.text_color, argb_to_hsla(argb));
+      }
    });
    let mut any = gpui::str_to_any(text)?;
    if !gpui::push_any(&mut d, &mut any) {
@@ -1894,7 +1897,7 @@ fn build_code_box(
          if let Some(span) = mono_span(line, COL_PLAIN) {
             box_div = gpui::push_div(box_div, span);
          }
-      } else if let Some(div) = plain_text_div(line, COL_PLAIN, 13.0) {
+      } else if let Some(div) = plain_text_div(line, Some(COL_PLAIN), 13.0) {
          box_div = gpui::push_div(box_div, div);
       }
    }
@@ -1910,7 +1913,7 @@ fn build_page_body(msym: &ModalSymbols, spec: &PageModalSpec) -> Option<RawDiv> 
             let mut block = gpui::v_stack(8.0)?;
             if let Some(t) = title
                && !t.is_empty()
-               && let Some(hdr) = plain_text_div(t, COL_MUTED, 12.0)
+               && let Some(hdr) = plain_text_div(t, Some(COL_MUTED), 12.0)
             {
                block = gpui::push_div(block, hdr);
             }
@@ -1937,12 +1940,12 @@ fn build_page_body(msym: &ModalSymbols, spec: &PageModalSpec) -> Option<RawDiv> 
             let mut block = gpui::v_stack(6.0)?;
             if let Some(t) = title
                && !t.is_empty()
-               && let Some(hdr) = plain_text_div(t, COL_MUTED, 12.0)
+               && let Some(hdr) = plain_text_div(t, Some(COL_MUTED), 12.0)
             {
                block = gpui::push_div(block, hdr);
             }
             for line in text.lines() {
-               if let Some(d) = plain_text_div(line, COL_PLAIN, 13.5) {
+               if let Some(d) = plain_text_div(line, None, 13.5) {
                   block = gpui::push_div(block, d);
                }
             }
@@ -1957,7 +1960,7 @@ fn build_page_body(msym: &ModalSymbols, spec: &PageModalSpec) -> Option<RawDiv> 
             let mut block = gpui::v_stack(6.0)?;
             if let Some(t) = title
                && !t.is_empty()
-               && let Some(hdr) = plain_text_div(t, COL_MUTED, 12.0)
+               && let Some(hdr) = plain_text_div(t, Some(COL_MUTED), 12.0)
             {
                block = gpui::push_div(block, hdr);
             }
@@ -2047,7 +2050,8 @@ fn build_overlay(window: *mut c_void, app: *mut c_void) -> Option<RawDiv> {
          if let Some(ref mut b) = body {
             gpui::style_div(b, |s| s.length(s.at.size[0], W_FULL));
             if let Some((msg, is_err)) = &ed.status
-               && let Some(st) = plain_text_div(msg, if *is_err { COL_ERROR } else { COL_OK }, 13.0)
+               && let Some(st) =
+                  plain_text_div(msg, Some(if *is_err { COL_ERROR } else { COL_OK }), 13.0)
             {
                *b = gpui::push_div(std::mem::replace(b, RawDiv::zeroed()), st);
             }
@@ -2086,7 +2090,7 @@ fn build_overlay(window: *mut c_void, app: *mut c_void) -> Option<RawDiv> {
                }
             } else if let Some(msg) = plain_text_div(
                "Native TextArea could not be resolved on this Discord build.",
-               COL_ERROR,
+               Some(COL_ERROR),
                13.5,
             ) {
                *b = gpui::push_div(std::mem::replace(b, RawDiv::zeroed()), msg);
@@ -2176,13 +2180,14 @@ fn build_overlay(window: *mut c_void, app: *mut c_void) -> Option<RawDiv> {
                }
             } else if let Some(msg) = plain_text_div(
                "Native TextInput could not be resolved on this Discord build.",
-               COL_ERROR,
+               Some(COL_ERROR),
                13.5,
             ) {
                *b = gpui::push_div(std::mem::replace(b, RawDiv::zeroed()), msg);
             }
             if let Some((msg, is_err)) = &inst.status
-               && let Some(st) = plain_text_div(msg, if *is_err { COL_ERROR } else { COL_OK }, 13.0)
+               && let Some(st) =
+                  plain_text_div(msg, Some(if *is_err { COL_ERROR } else { COL_OK }), 13.0)
             {
                *b = gpui::push_div(std::mem::replace(b, RawDiv::zeroed()), st);
             }
