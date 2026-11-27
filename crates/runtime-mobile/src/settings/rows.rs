@@ -248,9 +248,9 @@ pub fn switch_row(
    }
    if let Some(track) = row.kids.get_mut(2).and_then(|wrap| wrap.kids.get_mut(0)) {
       track.press = Some(toggle);
-      animate(track, &layouts.track_worklet, &layouts.track_off, on);
+      animate(track, &layouts.track_worklet, &layouts.track_off, on, false);
       if let Some(knob) = track.kids.get_mut(0) {
-         animate(knob, &layouts.knob_worklet, &layouts.knob_off, on);
+         animate(knob, &layouts.knob_worklet, &layouts.knob_off, on, true);
       }
    }
    if icon.is_none() {
@@ -261,9 +261,16 @@ pub fn switch_row(
 
 /// Gives a switch part built from the "on" template the props for `on` and a
 /// worklet to spring between both states.
-fn animate(node: &mut Tree, worklet: &'static Worklet, off: &Props, on: bool) {
+fn animate(node: &mut Tree, worklet: &'static Worklet, off: &Props, on: bool, knob: bool) {
    let mut off = off.clone();
    template_props(&mut off);
+   if knob && crate::settings::theme::light() {
+      for (key, value) in &mut off {
+         if *key == prop!("background") && *value == Value::I64(4294967295) {
+            *value = Value::I64(0xFF62_636D);
+         }
+      }
+   }
    let other = if on {
       off
    } else {
