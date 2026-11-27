@@ -14,7 +14,7 @@ mod pages;
 mod plugin;
 mod render;
 mod rows;
-mod theme;
+pub(crate) use crate::theme;
 mod tree;
 
 use std::{
@@ -243,6 +243,14 @@ static SETTINGS: LazyLock<Mutex<Settings>> = LazyLock::new(|| {
 static WORKER: OnceLock<Sender<Job>> = OnceLock::new();
 /// Set while a [`Job::Log`] is queued, so a burst of lines costs one update.
 static LOG_QUEUED: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn notify_theme_changed() {
+   if settings().screen.is_some()
+      && let Some(worker) = WORKER.get()
+   {
+      let _ = worker.send(Job::ThemeChanged);
+   }
+}
 
 fn settings() -> MutexGuard<'static, Settings> {
    SETTINGS.lock().unwrap_or_else(PoisonError::into_inner)
